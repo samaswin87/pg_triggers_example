@@ -5,7 +5,7 @@
 PgSqlTriggers::DSL.pg_sql_trigger "post_slug_generation" do
   table :posts
   on :insert, :update
-  function "generate_post_slug"
+  function :generate_post_slug
   version 1
   enabled true
   when_env :development, :test

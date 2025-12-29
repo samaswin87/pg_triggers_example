@@ -5,7 +5,7 @@
 PgSqlTriggers::DSL.pg_sql_trigger "user_email_validation" do
   table :users
   on :insert, :update
-  function "validate_user_email"
+  function :validate_user_email
   version 1
   enabled true
   when_env :development, :test

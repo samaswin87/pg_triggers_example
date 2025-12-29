@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_27_131711) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_29_020711) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -59,14 +59,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_27_131711) do
     t.string "environment"
     t.text "definition"
     t.text "function_body"
-    t.datetime "installed_at", precision: nil
-    t.datetime "last_verified_at", precision: nil
+    t.text "condition"
+    t.string "timing", default: "before", null: false
+    t.datetime "installed_at"
+    t.datetime "last_verified_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["enabled"], name: "index_pg_sql_triggers_registry_on_enabled"
     t.index ["environment"], name: "index_pg_sql_triggers_registry_on_environment"
     t.index ["source"], name: "index_pg_sql_triggers_registry_on_source"
     t.index ["table_name"], name: "index_pg_sql_triggers_registry_on_table_name"
+    t.index ["timing"], name: "index_pg_sql_triggers_registry_on_timing"
     t.index ["trigger_name"], name: "index_pg_sql_triggers_registry_on_trigger_name", unique: true
   end
 

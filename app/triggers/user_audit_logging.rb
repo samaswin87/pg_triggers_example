@@ -5,7 +5,7 @@
 PgSqlTriggers::DSL.pg_sql_trigger "user_audit_logging" do
   table :users
   on :insert, :update, :delete
-  function "log_user_changes"
+  function :log_user_changes
   version 1
   enabled true
   when_env :development, :test

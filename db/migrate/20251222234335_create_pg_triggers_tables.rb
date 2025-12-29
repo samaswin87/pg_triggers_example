@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class CreatePgTriggersTables < ActiveRecord::Migration[6.0]
+class CreatePgTriggersTables < ActiveRecord::Migration[8.0]
   def change
     # Registry table - source of truth for all triggers
     create_table :pg_sql_triggers_registry do |t|
@@ -13,6 +13,8 @@ class CreatePgTriggersTables < ActiveRecord::Migration[6.0]
       t.string :environment
       t.text :definition # Stored DSL or SQL definition
       t.text :function_body # The actual function body
+      t.text :condition # Optional WHEN clause condition
+      t.string :timing, default: "before", null: false # Trigger timing: before or after
       t.datetime :installed_at
       t.datetime :last_verified_at
 
@@ -24,6 +26,7 @@ class CreatePgTriggersTables < ActiveRecord::Migration[6.0]
     add_index :pg_sql_triggers_registry, :enabled
     add_index :pg_sql_triggers_registry, :source
     add_index :pg_sql_triggers_registry, :environment
+    add_index :pg_sql_triggers_registry, :timing
 
     # Trigger migrations table - tracks which trigger migrations have been run
     create_table :trigger_migrations do |t|
