@@ -8,6 +8,7 @@ PgSqlTriggers::DSL.pg_sql_trigger "user_audit_logging" do
   function :log_user_changes
   version 1
   enabled true
+  timing :after
   when_env :development, :test
 end
 
