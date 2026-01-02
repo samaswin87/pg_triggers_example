@@ -1,0 +1,297 @@
+<% content_for :title, "PgSQL Triggers Test UI" %>
+
+<div style="max-width: 1400px; margin: 0 auto; padding: 20px; font-family: system-ui, -apple-system, sans-serif;">
+  <h1 style="color: #2563eb; border-bottom: 3px solid #2563eb; padding-bottom: 10px;">
+    🧪 PgSQL Triggers Test UI
+  </h1>
+
+  <% if flash[:success] %>
+    <div style="background: #d1fae5; border: 1px solid #10b981; color: #065f46; padding: 12px; border-radius: 6px; margin: 20px 0;">
+      ✅ <%= flash[:success] %>
+    </div>
+  <% end %>
+
+  <% if flash[:error] %>
+    <div style="background: #fee2e2; border: 1px solid #ef4444; color: #991b1b; padding: 12px; border-radius: 6px; margin: 20px 0;">
+      ❌ <%= flash[:error] %>
+    </div>
+  <% end %>
+
+  <% if flash[:warning] %>
+    <div style="background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; padding: 12px; border-radius: 6px; margin: 20px 0;">
+      ⚠️ <%= flash[:warning] %>
+    </div>
+  <% end %>
+
+  <!-- Triggers Registry -->
+  <section style="margin: 30px 0; background: #f9fafb; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
+    <h2 style="color: #1f2937; margin-bottom: 15px;">📋 Registered Triggers</h2>
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 6px;">
+        <thead>
+          <tr style="background: #f3f4f6;">
+            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e7eb;">Trigger Name</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e7eb;">Table</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e7eb;">Timing</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e7eb;">Condition</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e7eb;">Status</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e7eb;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @triggers.each do |trigger| %>
+            <tr style="border-bottom: 1px solid #e5e7eb;">
+              <td style="padding: 12px;"><strong><%= trigger.trigger_name %></strong></td>
+              <td style="padding: 12px;"><code><%= trigger.table_name %></code></td>
+              <td style="padding: 12px;">
+                <span style="background: <%= trigger.timing == 'after' ? '#dbeafe' : '#fef3c7' %>; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;">
+                  <%= trigger.timing.upcase %>
+                </span>
+              </td>
+              <td style="padding: 12px;">
+                <% if trigger.condition.present? %>
+                  <code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 0.85em;" title="<%= trigger.condition %>">
+                    <%= truncate(trigger.condition, length: 40) %>
+                  </code>
+                <% else %>
+                  <span style="color: #9ca3af;">—</span>
+                <% end %>
+              </td>
+              <td style="padding: 12px;">
+                <% if trigger.enabled? %>
+                  <span style="background: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 4px; font-size: 0.85em; font-weight: 600;">
+                    ✓ Enabled
+                  </span>
+                <% else %>
+                  <span style="background: #fee2e2; color: #991b1b; padding: 4px 12px; border-radius: 4px; font-size: 0.85em; font-weight: 600;">
+                    ✗ Disabled
+                  </span>
+                <% end %>
+              </td>
+              <td style="padding: 12px;">
+                <%= form_with url: toggle_trigger_trigger_tests_path, method: :post, local: true, style: "display: inline;" do |f| %>
+                  <%= f.hidden_field :trigger_name, value: trigger.trigger_name %>
+                  <%= f.submit trigger.enabled? ? "Disable" : "Enable", 
+                      style: "background: #{trigger.enabled? ? '#ef4444' : '#10b981'}; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85em;" %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Test Forms -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin: 30px 0;">
+    
+    <!-- User Email Validation Test -->
+    <section style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <h3 style="color: #1f2937; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">
+        📧 Test: User Email Validation (BEFORE trigger)
+      </h3>
+      <p style="color: #6b7280; font-size: 0.9em; margin-bottom: 15px;">
+        Tests the <code>user_email_validation</code> trigger that validates email format before insert/update.
+      </p>
+      <%= form_with url: test_user_email_trigger_tests_path, method: :post, local: true, scope: :user do |f| %>
+        <div style="margin-bottom: 12px;">
+          <%= f.label :name, "Name", style: "display: block; margin-bottom: 4px; font-weight: 600; color: #374151;" %>
+          <%= f.text_field :name, required: true, style: "width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box;" %>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <%= f.label :email, "Email", style: "display: block; margin-bottom: 4px; font-weight: 600; color: #374151;" %>
+          <%= f.email_field :email, required: true, placeholder: "test@example.com or invalid-email", style: "width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box;" %>
+        </div>
+        <%= f.submit "Test Email Validation", style: "background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: 600; width: 100%;" %>
+      <% end %>
+    </section>
+
+    <!-- Post Slug Generation Test -->
+    <section style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <h3 style="color: #1f2937; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">
+        📝 Test: Post Slug Generation (BEFORE trigger)
+      </h3>
+      <p style="color: #6b7280; font-size: 0.9em; margin-bottom: 15px;">
+        Tests the <code>post_slug_generation</code> trigger that auto-generates slug from title.
+      </p>
+      <%= form_with url: test_post_slug_trigger_tests_path, method: :post, local: true, scope: :post do |f| %>
+        <div style="margin-bottom: 12px;">
+          <%= f.label :user_id, "User ID", style: "display: block; margin-bottom: 4px; font-weight: 600; color: #374151;" %>
+          <%= f.number_field :user_id, required: true, value: @users.first&.id, style: "width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box;" %>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <%= f.label :title, "Title", style: "display: block; margin-bottom: 4px; font-weight: 600; color: #374151;" %>
+          <%= f.text_field :title, required: true, placeholder: "My Awesome Post Title!", style: "width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box;" %>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <%= f.label :body, "Body", style: "display: block; margin-bottom: 4px; font-weight: 600; color: #374151;" %>
+          <%= f.text_area :body, rows: 3, style: "width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box;" %>
+        </div>
+        <%= f.submit "Test Slug Generation", style: "background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: 600; width: 100%;" %>
+      <% end %>
+    </section>
+
+    <!-- Order Total Validation Test -->
+    <section style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <h3 style="color: #1f2937; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">
+        💰 Test: Order Total Validation (BEFORE trigger)
+      </h3>
+      <p style="color: #6b7280; font-size: 0.9em; margin-bottom: 15px;">
+        Tests the <code>order_total_validation</code> trigger that prevents negative totals.
+      </p>
+      <%= form_with url: test_order_total_trigger_tests_path, method: :post, local: true, scope: :order do |f| %>
+        <div style="margin-bottom: 12px;">
+          <%= f.label :user_id, "User ID", style: "display: block; margin-bottom: 4px; font-weight: 600; color: #374151;" %>
+          <%= f.number_field :user_id, required: true, value: @users.first&.id, style: "width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box;" %>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <%= f.label :total_amount, "Total Amount", style: "display: block; margin-bottom: 4px; font-weight: 600; color: #374151;" %>
+          <%= f.number_field :total_amount, required: true, step: 0.01, placeholder: "Try -10.00 to test validation", style: "width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box;" %>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <%= f.label :status, "Status", style: "display: block; margin-bottom: 4px; font-weight: 600; color: #374151;" %>
+          <%= f.select :status, [['pending', 'pending'], ['processing', 'processing'], ['shipped', 'shipped'], ['delivered', 'delivered'], ['cancelled', 'cancelled']], 
+              { selected: 'pending' }, 
+              { style: "width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box;" } %>
+        </div>
+        <%= f.submit "Test Total Validation", style: "background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: 600; width: 100%;" %>
+      <% end %>
+    </section>
+
+    <!-- Order Status Validation with Condition Test -->
+    <section style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <h3 style="color: #1f2937; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">
+        🎯 Test: Order Status Validation (BEFORE trigger with CONDITION)
+      </h3>
+      <p style="color: #6b7280; font-size: 0.9em; margin-bottom: 15px;">
+        Tests the <code>order_status_validation</code> trigger with WHEN condition. Only fires when status != 'cancelled'.
+      </p>
+      <%= form_with url: test_order_status_trigger_tests_path, method: :post, local: true, scope: :order do |f| %>
+        <div style="margin-bottom: 12px;">
+          <%= f.label :user_id, "User ID", style: "display: block; margin-bottom: 4px; font-weight: 600; color: #374151;" %>
+          <%= f.number_field :user_id, required: true, value: @users.first&.id, style: "width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box;" %>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <%= f.label :total_amount, "Total Amount", style: "display: block; margin-bottom: 4px; font-weight: 600; color: #374151;" %>
+          <%= f.number_field :total_amount, required: true, step: 0.01, value: 100.00, style: "width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box;" %>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <%= f.label :status, "Status", style: "display: block; margin-bottom: 4px; font-weight: 600; color: #374151;" %>
+          <%= f.select :status, [['pending', 'pending'], ['processing', 'processing'], ['invalid_status', 'invalid_status'], ['cancelled', 'cancelled']], 
+              { selected: 'pending' }, 
+              { style: "width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box;" } %>
+          <small style="color: #6b7280; font-size: 0.85em;">Try 'invalid_status' to test validation, or 'cancelled' to see condition skip trigger</small>
+        </div>
+        <%= f.submit "Test Status Validation", style: "background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: 600; width: 100%;" %>
+      <% end %>
+    </section>
+
+    <!-- Comment Count Update Test -->
+    <section style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <h3 style="color: #1f2937; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">
+        💬 Test: Comment Count Update (AFTER trigger)
+      </h3>
+      <p style="color: #6b7280; font-size: 0.9em; margin-bottom: 15px;">
+        Tests the <code>post_comment_count_update</code> trigger that updates post comment_count after insert.
+      </p>
+      <%= form_with url: test_comment_count_trigger_tests_path, method: :post, local: true, scope: :comment do |f| %>
+        <div style="margin-bottom: 12px;">
+          <%= f.label :post_id, "Post ID", style: "display: block; margin-bottom: 4px; font-weight: 600; color: #374151;" %>
+          <%= f.number_field :post_id, required: true, value: @posts.first&.id, style: "width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box;" %>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <%= f.label :user_id, "User ID", style: "display: block; margin-bottom: 4px; font-weight: 600; color: #374151;" %>
+          <%= f.number_field :user_id, required: true, value: @users.first&.id, style: "width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box;" %>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <%= f.label :body, "Comment", style: "display: block; margin-bottom: 4px; font-weight: 600; color: #374151;" %>
+          <%= f.text_area :body, required: true, rows: 3, placeholder: "Great post!", style: "width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box;" %>
+        </div>
+        <%= f.submit "Test Comment Count", style: "background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: 600; width: 100%;" %>
+      <% end %>
+    </section>
+
+    <!-- Audit Logging Test -->
+    <section style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <h3 style="color: #1f2937; margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">
+        📊 Test: User Audit Logging (AFTER trigger)
+      </h3>
+      <p style="color: #6b7280; font-size: 0.9em; margin-bottom: 15px;">
+        Tests the <code>user_audit_logging</code> trigger that logs all user changes after insert/update/delete.
+      </p>
+      <%= form_with url: test_audit_logging_trigger_tests_path, method: :post, local: true do |f| %>
+        <div style="margin-bottom: 12px;">
+          <%= f.label :user_id, "User ID", style: "display: block; margin-bottom: 4px; font-weight: 600; color: #374151;" %>
+          <%= f.number_field :user_id, required: true, value: @users.first&.id, style: "width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box;" %>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <%= f.label :new_email, "New Email", style: "display: block; margin-bottom: 4px; font-weight: 600; color: #374151;" %>
+          <%= f.email_field :new_email, placeholder: "new_email@example.com", style: "width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box;" %>
+        </div>
+        <%= f.submit "Test Audit Logging", style: "background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: 600; width: 100%;" %>
+      <% end %>
+    </section>
+  </div>
+
+  <!-- Recent Data -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 30px 0;">
+    <section style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
+      <h3 style="color: #1f2937; margin-bottom: 15px;">👥 Recent Users</h3>
+      <ul style="list-style: none; padding: 0; margin: 0;">
+        <% @users.each do |user| %>
+          <li style="padding: 8px; border-bottom: 1px solid #e5e7eb;">
+            <strong>ID <%= user.id %></strong>: <%= user.name %> (<%= user.email %>)
+          </li>
+        <% end %>
+      </ul>
+    </section>
+
+    <section style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
+      <h3 style="color: #1f2937; margin-bottom: 15px;">📝 Recent Posts</h3>
+      <ul style="list-style: none; padding: 0; margin: 0;">
+        <% @posts.each do |post| %>
+          <li style="padding: 8px; border-bottom: 1px solid #e5e7eb;">
+            <strong>ID <%= post.id %></strong>: <%= truncate(post.title, length: 30) %>
+            <br><small style="color: #6b7280;">Slug: <code><%= post.slug %></code> | Comments: <%= post.comment_count %></small>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+
+    <section style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
+      <h3 style="color: #1f2937; margin-bottom: 15px;">💰 Recent Orders</h3>
+      <ul style="list-style: none; padding: 0; margin: 0;">
+        <% @orders.each do |order| %>
+          <li style="padding: 8px; border-bottom: 1px solid #e5e7eb;">
+            <strong>ID <%= order.id %></strong>: $<%= order.total_amount %> (<%= order.status %>)
+          </li>
+        <% end %>
+      </ul>
+    </section>
+
+    <section style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
+      <h3 style="color: #1f2937; margin-bottom: 15px;">📊 Recent Audit Logs</h3>
+      <ul style="list-style: none; padding: 0; margin: 0; max-height: 300px; overflow-y: auto;">
+        <% @audit_logs.each do |log| %>
+          <li style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-size: 0.9em;">
+            <strong><%= log.action.upcase %></strong> on <%= log.table_name %>#<%= log.record_id %>
+            <br><small style="color: #6b7280;"><%= log.occurred_at.strftime("%Y-%m-%d %H:%M:%S") %></small>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  </div>
+
+  <div style="margin-top: 40px; padding: 20px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;">
+    <h3 style="color: #1e40af; margin-bottom: 10px;">🔗 Quick Links</h3>
+    <p style="color: #1e3a8a; margin-bottom: 10px;">
+      <a href="/pg_sql_triggers" style="color: #2563eb; text-decoration: underline; font-weight: 600;">
+        View PgSQL Triggers Engine UI
+      </a>
+    </p>
+    <p style="color: #6b7280; font-size: 0.9em;">
+      The PgSQL Triggers Engine provides a comprehensive UI for managing triggers, viewing registry, and more.
+    </p>
+  </div>
+</div>
+

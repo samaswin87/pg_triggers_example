@@ -10,6 +10,17 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  # Trigger testing UI
+  root "trigger_tests#index"
+  resources :trigger_tests, only: [:index] do
+    collection do
+      post :test_user_email
+      post :test_post_slug
+      post :test_order_total
+      post :test_order_status
+      post :test_comment_count
+      post :test_audit_logging
+      post :toggle_trigger
+    end
+  end
 end
