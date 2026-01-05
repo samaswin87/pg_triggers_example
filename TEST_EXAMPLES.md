@@ -302,14 +302,14 @@ PgSqlTriggers::Registry.find_by(trigger_name: 'user_email_validation').enabled?
 
 ## 🎯 UI Testing Checklist
 
-### Triggers Registry Table
+### Triggers Registry Table (Test UI at `/`)
 - [ ] View all registered triggers
 - [ ] See timing (BEFORE/AFTER) for each trigger
 - [ ] See condition (WHEN clause) for triggers that have it
 - [ ] See enabled/disabled status
 - [ ] Toggle trigger enable/disable status
 
-### Test Forms
+### Test Forms (Test UI at `/`)
 - [ ] Test User Email Validation (valid and invalid emails)
 - [ ] Test Post Slug Generation (verify slug is created)
 - [ ] Test Order Total Validation (positive and negative amounts)
@@ -317,11 +317,292 @@ PgSqlTriggers::Registry.find_by(trigger_name: 'user_email_validation').enabled?
 - [ ] Test Comment Count Update (verify count increments)
 - [ ] Test User Audit Logging (verify audit log entries created)
 
-### Data Display
+### Data Display (Test UI at `/`)
 - [ ] View recent users
 - [ ] View recent posts (with slugs and comment counts)
 - [ ] View recent orders (with statuses)
 - [ ] View recent audit logs
+
+---
+
+## 🖥️ PgSQL Triggers Engine UI Testing (`/pg_sql_triggers`)
+
+The gem provides a comprehensive UI at `/pg_sql_triggers` for managing triggers, viewing registry, and more.
+
+### Dashboard (`/pg_sql_triggers` or `/pg_sql_triggers/dashboard`)
+
+**Statistics Cards:**
+- [ ] View Total Triggers count
+- [ ] View Enabled triggers count
+- [ ] View Disabled triggers count
+- [ ] View Drifted triggers count (triggers that differ from registry)
+
+**Recent Triggers Table:**
+- [ ] View recent triggers with trigger name, table, version, status, source
+- [ ] See trigger status (Enabled/Disabled) badges
+- [ ] See source badges (migration, manual, etc.)
+- [ ] View "Last Applied" timestamp for each trigger
+- [ ] Enable/Disable triggers from dashboard
+- [ ] Click trigger name to view trigger details
+- [ ] See "Re-execute" button for drifted triggers
+- [ ] See "Drop" button for triggers (if permissions allow)
+
+**Migration Management Section:**
+- [ ] View migration statistics (Total Migrations, Applied, Pending, Current Version)
+- [ ] See pending migrations list (if any)
+- [ ] Apply All Pending Migrations button
+- [ ] Rollback Last Migration button
+- [ ] Redo Last Migration button
+- [ ] View Migration Status table with all migrations
+- [ ] See migration status (Applied/Pending) badges
+- [ ] Use "Up" button for pending migrations (applies individual migration)
+- [ ] Use "Down" button for applied migrations (rollbacks individual migration)
+- [ ] Use "Redo" button for applied migrations (redo individual migration)
+- [ ] Navigate pagination (Previous/Next buttons)
+- [ ] Change items per page (10, 20, 50, 100)
+- [ ] See pagination info (Page X of Y)
+- [ ] Confirmations show for migration actions (kill switch protection)
+
+### Tables Index (`/pg_sql_triggers/tables`)
+
+**Statistics:**
+- [ ] View "Tables with Triggers" count
+
+**Tables List:**
+- [ ] View all tables that have triggers
+- [ ] See table name and trigger count
+- [ ] See trigger names and function names for each table
+- [ ] See enabled/disabled status for each trigger
+- [ ] See "DB Only" badges for triggers not in registry
+- [ ] See status summary (X Enabled, Y Disabled) for each table
+- [ ] Click "View Details" to see table details
+- [ ] Click "Create Trigger" to generate new trigger for table
+
+**Empty State:**
+- [ ] See message when no tables with triggers found
+- [ ] See "Generate New Trigger" button in empty state
+
+### Table Details (`/pg_sql_triggers/tables/:table_name`)
+
+**Table Information:**
+- [ ] View table columns (name, data type, nullable status)
+- [ ] See breadcrumb navigation (Dashboard > Tables > Table Name)
+
+**Registered Triggers Section:**
+- [ ] View all registered triggers for the table
+- [ ] See trigger name (link to trigger details), status, version, source
+- [ ] See environment information (if present)
+- [ ] See function name and events for each trigger
+- [ ] View function body (expandable details section)
+- [ ] Enable/Disable trigger buttons (with confirmation modals)
+- [ ] See "Re-execute" button for drifted triggers
+- [ ] See "Drop" button (with confirmation modal)
+- [ ] Click "Create a trigger" if no registered triggers
+
+**Database Triggers Section (Not in Registry):**
+- [ ] View triggers that exist in database but not in registry
+- [ ] See "DB Only" badges
+- [ ] View trigger definition (expandable details section)
+- [ ] Section shows warning style (yellow background)
+
+**Actions:**
+- [ ] Click "← Back to Tables" to return to tables list
+- [ ] Click "Create Trigger for this Table" button
+
+### Trigger Details (`/pg_sql_triggers/triggers/:id`)
+
+**Navigation:**
+- [ ] See breadcrumb navigation (Dashboard > Tables > Table Name > Trigger Name)
+- [ ] Click breadcrumb links to navigate
+
+**Drift Warning:**
+- [ ] See drift warning banner if trigger has drifted
+- [ ] See drift type information
+
+**Trigger Summary:**
+- [ ] View trigger status (Enabled/Disabled badge)
+- [ ] View table name, version, source
+- [ ] View environment (if present)
+- [ ] View "Last Applied" timestamp
+- [ ] View "Last Verified" timestamp (if present)
+- [ ] View "Created At" timestamp
+
+**Trigger Configuration:**
+- [ ] View function name
+- [ ] View timing (BEFORE/AFTER badge)
+- [ ] View events (INSERT, UPDATE, DELETE, TRUNCATE badges)
+- [ ] View condition (WHEN clause) if present
+- [ ] View environments (if specified)
+
+**SQL Drift Comparison (if drift detected):**
+- [ ] View "Expected SQL" (from DSL) in green background
+- [ ] View "Actual SQL" (from database) in red background
+- [ ] Compare differences between expected and actual
+
+**Function Body:**
+- [ ] View complete function body code
+- [ ] Code is properly formatted in code block
+
+**Action Buttons:**
+- [ ] Enable/Disable trigger button (with confirmation modal)
+- [ ] See "Re-execute Trigger" button if drift detected (with confirmation modal)
+- [ ] See "Drop Trigger" button (with confirmation modal and kill switch protection)
+- [ ] Click "← Back to Dashboard" to return
+- [ ] Click "View Table" to see table details
+
+### Trigger Generator (`/pg_sql_triggers/generator/new`)
+
+**Basic Information Section:**
+- [ ] Enter trigger name (lowercase, underscores only)
+- [ ] Select table name from dropdown
+- [ ] See table validation message (✓ Table exists or ✗ Table not found)
+- [ ] See existing triggers info for selected table
+- [ ] Enter function name
+- [ ] Enter function body (PL/pgSQL code)
+- [ ] Function body template updates when function name changes
+- [ ] See validation errors for required fields
+
+**Trigger Events Section:**
+- [ ] Select timing (Before/After)
+- [ ] Select events (INSERT, UPDATE, DELETE, TRUNCATE checkboxes)
+- [ ] At least one event must be selected
+
+**Configuration Section:**
+- [ ] Set version number (default: 1)
+- [ ] Select target environments (Development, Test, Staging, Production checkboxes)
+- [ ] Enter WHEN condition (optional SQL condition)
+- [ ] Check/uncheck "Enable trigger after creation"
+- [ ] Check/uncheck "Generate PL/pgSQL function stub"
+
+**Form Validation:**
+- [ ] Client-side validation works (shows errors before submit)
+- [ ] Server-side validation works (shows errors after submit)
+- [ ] Validation for trigger name format
+- [ ] Validation for function name format
+- [ ] Validation for function body containing function definition
+- [ ] Validation for at least one event selected
+
+**Actions:**
+- [ ] Click "Preview Generated Code" to preview
+- [ ] Click "Cancel" to go back
+
+### Trigger Generator Preview (`/pg_sql_triggers/generator/preview`)
+
+**Preview Display:**
+- [ ] View generated migration code
+- [ ] View generated function code (if stub selected)
+- [ ] Code is properly formatted
+- [ ] Confirm to create trigger
+- [ ] Go back to edit form
+
+### SQL Capsules (`/pg_sql_triggers/sql_capsules/new`)
+
+**Warning Banner:**
+- [ ] See warning about SQL Capsules being dangerous
+- [ ] Warning mentions emergency operations only
+
+**Form Fields:**
+- [ ] Enter capsule name (alphanumeric, underscores, hyphens)
+- [ ] Enter environment
+- [ ] Enter purpose (description text area)
+- [ ] Enter SQL statement (code text area)
+
+**Actions:**
+- [ ] Click "Cancel" to return to dashboard
+- [ ] Click "Create Capsule" to save
+
+**SQL Capsule View (`/pg_sql_triggers/sql_capsules/:id`):**
+- [ ] View capsule details
+- [ ] View SQL code
+- [ ] Execute capsule (with confirmation)
+
+### Audit Logs (`/pg_sql_triggers/audit_logs`)
+
+**Filters:**
+- [ ] Filter by trigger name (dropdown with "All" option)
+- [ ] Filter by operation (dropdown with "All" option)
+- [ ] Filter by status (All, Success, Failure)
+- [ ] Filter by environment (dropdown with "All" option)
+- [ ] Select sort order (Newest First, Oldest First)
+- [ ] Click "Apply Filters" to filter results
+- [ ] Click "Clear" to reset filters
+
+**Results:**
+- [ ] See total results count
+- [ ] See "(filtered)" indicator when filters applied
+- [ ] View audit log entries in table format
+- [ ] See time (relative and absolute), trigger name (link to trigger), operation, status, environment, actor, reason, error message
+- [ ] Status badges (Success in green, Failure in red)
+- [ ] Click trigger name to view trigger details
+- [ ] Truncated text shows full on hover (reason, error message)
+
+**Pagination:**
+- [ ] Navigate Previous/Next pages
+- [ ] See "Page X of Y" indicator
+- [ ] Previous/Next buttons disabled at boundaries
+
+**Export:**
+- [ ] Click "Export CSV" to download CSV file
+- [ ] CSV includes filtered results
+- [ ] CSV includes all columns
+
+**Empty State:**
+- [ ] See message when no audit log entries found
+- [ ] See suggestion to adjust filters if filters applied
+
+### Kill Switch Status
+
+**Kill Switch Active (Production/Staging):**
+- [ ] See kill switch active banner (yellow/warning style)
+- [ ] See environment name in banner
+- [ ] Banner mentions confirmation required
+- [ ] Confirmation modals appear for dangerous operations
+- [ ] Must enter kill switch override text to proceed
+
+**Kill Switch Inactive (Development/Test):**
+- [ ] See kill switch inactive banner (blue/info style)
+- [ ] See environment name in banner
+- [ ] Banner mentions operations can be performed without confirmation
+- [ ] No confirmation required for operations
+
+### Confirmation Modals
+
+**Modal Features:**
+- [ ] Modal appears for Enable/Disable trigger actions
+- [ ] Modal appears for Drop trigger actions
+- [ ] Modal appears for Re-execute trigger actions
+- [ ] Modal appears for migration actions (Up, Down, Redo)
+- [ ] Modal shows operation title
+- [ ] Modal shows confirmation message
+- [ ] Modal shows kill switch override field (if kill switch active)
+- [ ] Can cancel modal (closes without action)
+- [ ] Can confirm action (proceeds with operation)
+- [ ] Modal blocks interaction with page behind it
+
+### General UI Features
+
+**Navigation:**
+- [ ] Navigate between Dashboard, Tables, Triggers
+- [ ] Breadcrumbs work correctly
+- [ ] Back buttons work correctly
+- [ ] Links to related pages work correctly
+
+**Responsive Design:**
+- [ ] UI works on different screen sizes
+- [ ] Tables are scrollable on small screens
+- [ ] Grid layouts adapt to screen size
+
+**Error Handling:**
+- [ ] Error messages display correctly
+- [ ] Flash messages show success/error/warning
+- [ ] Validation errors show inline in forms
+- [ ] 404 errors handled gracefully
+
+**Permissions:**
+- [ ] Buttons hidden if user lacks permissions
+- [ ] Enable/Disable buttons only show if permitted
+- [ ] Drop buttons only show if permitted
+- [ ] Actions fail gracefully with permission errors
 
 ---
 
